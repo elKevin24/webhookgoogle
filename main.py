@@ -9,9 +9,19 @@ def hello_http(request):
     # Caso: viene de Dialogflow CX
     if "fulfillmentInfo" in req:
         params = req.get("sessionInfo", {}).get("parameters", {}) or {}
-        # Recupera parámetro 'nit' si existe, si no usa 'desconocido'
         nit = params.get("nit", "desconocido")
-        msg = f"El NIT recibido es: {nit}"
+
+        # Verifica último dígito numérico
+        digitos = "".join(c for c in str(nit) if c.isdigit())
+        if digitos:
+            ultimo = int(digitos[-1])
+            if ultimo % 2 == 0:
+                msg = f"El NIT {nit} está OMISO (termina en número par)."
+            else:
+                msg = f"El NIT {nit} no tiene omisos (termina en número impar)."
+        else:
+            msg = f"El NIT recibido ({nit}) no contiene dígitos válidos."
+
         return jsonify({
             "fulfillment_response": {
                 "messages": [
